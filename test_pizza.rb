@@ -110,9 +110,9 @@ class Test < Minitest::Test
 
   def test_sample
     input = %(3 5 1 6
-MMMMM
-MTTTM
-MMMMM)
+TTTTT
+TMMMT
+TTTTT)
     output = %(3
 0 0 2 1
 0 2 2 2
@@ -123,14 +123,16 @@ MMMMM)
   def test_single_element
     input = %(1 1 1 1
 T)
-    output = %(0)
+    output = %(0
+)
     assert_equal output, prepare_output(solution(prepare_input(input)))
   end
 
   def test_two_elements
     input = %(1 2 1 1
 TM)
-    output = %(0)
+    output = %(0
+)
     assert_equal output, prepare_output(solution(prepare_input(input)))
   end
 
@@ -155,7 +157,7 @@ TM)
     _r, _c, l, h = s.split("\n").first.split(' ').map(&:to_i)
     aa = []
     s.split("\n")[1..-1].each do |row|
-      aa << row.split('').map { |c| c == 'T' ? 1 : 0 }
+      aa << row.split('').map { |c| c == 'M' ? 1 : 0 }
       # { val: 1, marked: false, important: false } : { val: 0, marked: false, important: false}  }
     end
     {

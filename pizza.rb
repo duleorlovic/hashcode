@@ -202,16 +202,22 @@ def marked_sum(marked)
 end
 
 if ARGV.length == 1
+  file_name = ARGV.last
   r, _c, l, h = gets.split(' ').map(&:to_i)
   aa = []
   r.times do
     # strip is needed since on hackerrank, new line is at the end of gets
-    aa << gets.strip.split('').map { |c| c == 'T' ? 1 : 0 }
+    aa << gets.strip.split('').map { |c| c == 'M' ? 1 : 0 }
     # { val: 1, marked: false, important: false } : { val: 0, marked: false, important: false}  }
   end
-  n, r = solution(aa: aa, l: l, h: h).values_at :n, :r
-  puts n
-  r.each do |row|
-    puts row.join(' ')
+  ppp aa
+  results = solution(aa: aa, l: l, h: h)
+  File.open "#{file_name}_output", 'w' do |file|
+    puts results.length
+    file.puts results.length
+    results.each do |row|
+      puts row.join(' ')
+      file.puts row.join(' ')
+    end
   end
 end
