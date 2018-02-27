@@ -8,7 +8,8 @@
 # S : total number of slices
 # x1 y1 x2 y2 : coordinate of first and last cell in slice (0 0) (2 1)
 #
-# points: example 15, small 27, medium 1433, big 7131
+# points: example 15, small 39, medium 47553, big 873_131, Total 920_738
+# https://hashcode-pizza.now.sh/ Visual
 require 'pp'
 require './ppp'
 require 'byebug'
@@ -24,6 +25,8 @@ def solution(aa:, l:, h:)
   # .(a+x,b). .  (a+x,b+y)
   # .   .   . .     .
   #
+  puts "l=#{l}, h=#{h}"
+  ppp aa
   marked = Array.new(aa.length) { Array.new(aa[0].length) }
   results = []
 
@@ -78,6 +81,13 @@ def solution(aa:, l:, h:)
       end
     end # row.each_with_index do |el, j|
   end # aa.each_with_index do |row, i|
+  sum_marked = marked.inject(0) do |sum, row|
+    sum + row.inject(0) do |row_sum, x|
+      row_sum + (x ? 1 : 0)
+    end
+  end
+  puts "sum(marked)=#{sum_marked} percentage=#{sum_marked*1.0/(aa.length * aa[0].length)}"
+  ppp marked
 
   results
 end
@@ -163,7 +173,7 @@ def slice_sum(aa, slice)
           if b == 0
             ps[c][d] - (ps[a-1][d] + 0 - 0)
           else
-            ps[c][d] - (0 + ps[c][b-1] - ps[a-1][b-1])
+            ps[c][d] - (ps[a-1][d] + ps[c][b-1] - ps[a-1][b-1])
           end
         end
   sum
@@ -197,27 +207,8 @@ def prefix_sum(aa)
   @prefix_sum
 end
 
-def marked_sum(marked)
-  return @marked_sum if @marked_sum
-  @marked_sum = []
-  marked.each_with_index do |row, i|
-    row_sum_array = []
-    sum = 0
-    row.each_with_index do |el, j|
-      sum += el
-      if i == 0
-        row_sum_array << sum
-      else
-        row_sum_array << sum + @marked_sum[i - 1][j]
-      end
-    end
-    @marked_sum << row_sum_array
-  end
-  @marked_sum
-end
-
 if ARGV.length == 1
-  file_name = ARGV.last
+  file_name = ARGV.last.split('.').first
   r, _c, l, h = gets.split(' ').map(&:to_i)
   aa = []
   r.times do
@@ -226,7 +217,7 @@ if ARGV.length == 1
     # { val: 1, marked: false, important: false } : { val: 0, marked: false, important: false}  }
   end
   results = solution(aa: aa, l: l, h: h)
-  File.open "#{file_name}_output", 'w' do |file|
+  File.open "#{file_name}.out", 'w' do |file|
     puts results.length
     file.puts results.length
     results.each do |row|
