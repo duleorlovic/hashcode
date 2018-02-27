@@ -7,6 +7,8 @@
 # output
 # S : total number of slices
 # x1 y1 x2 y2 : coordinate of first and last cell in slice (0 0) (2 1)
+#
+# points: example 15, small 27, medium 1433, big 7131
 require 'pp'
 require './ppp'
 require 'byebug'
@@ -125,6 +127,20 @@ def mark(marked, slice)
   marked
 end
 
+def submatrix(aa, slice)
+  a, b = slice[0]
+  c, d = slice[1]
+  res = []
+  (a..c).each do |x|
+    row = []
+    (b..d).each do |y|
+      row << aa[x][y]
+    end
+    res << row
+  end
+  res
+end
+
 def slice_area(slice)
   a, b = slice[0]
   c, d = slice[1]
@@ -137,7 +153,6 @@ def slice_sum(aa, slice)
   ps = prefix_sum(aa)
   a, b = slice[0]
   c, d = slice[1]
-  # byebug if ps[c].nil? || ps[c][d].nil? || ps[c][b-1].nil? || ps[a-1][d].nil?
   sum = if a == 0
           if b == 0
             ps[c][d]
@@ -148,7 +163,7 @@ def slice_sum(aa, slice)
           if b == 0
             ps[c][d] - (ps[a-1][d] + 0 - 0)
           else
-            ps[c][d] - (0 + ps[c][b-1] - 0)
+            ps[c][d] - (0 + ps[c][b-1] - ps[a-1][b-1])
           end
         end
   sum
@@ -210,7 +225,6 @@ if ARGV.length == 1
     aa << gets.strip.split('').map { |c| c == 'M' ? 1 : 0 }
     # { val: 1, marked: false, important: false } : { val: 0, marked: false, important: false}  }
   end
-  ppp aa
   results = solution(aa: aa, l: l, h: h)
   File.open "#{file_name}_output", 'w' do |file|
     puts results.length

@@ -66,6 +66,21 @@ class Test < Minitest::Test
     assert_equal m1, mark(marked, [[0,0],[0,0]])
   end
 
+  def test_submatric
+    a =
+    [
+      [0, 1, 0, 0],
+      [1, 1, 0, 1],
+      [0, 0, 0, 1],
+    ]
+    m1 =
+    [
+      [0, 1],
+      [1, 1],
+    ]
+    assert_equal m1, submatrix(a, [[0,0],[1,1]])
+  end
+
   def test_slice_area
     assert_equal 1, slice_area([[1,1],[1,1]])
     assert_equal 2, slice_area([[0,1],[1,1]])
