@@ -123,6 +123,73 @@ class Test < Minitest::Test
     assert_equal 1, slice_sum(a, [[0,0],[2,1]])
   end
 
+  def test_rotate
+    a =
+    [
+      [0, 0, 0, 0],
+      [0, 1, 1, 1],
+      [0, 0, 1, 0],
+    ]
+    rotated =
+    [
+      [0, 0, 0],
+      [0, 1, 0],
+      [1, 1, 0],
+      [0, 1, 0],
+    ]
+    assert_equal rotated, rotate(a)
+  end
+
+  def test_transpose
+    a =
+    [
+      [0, 0, 0, 0],
+      [0, 1, 1, 1],
+      [0, 0, 1, 0],
+    ]
+    transposed =
+    [
+      [0, 0, 0],
+      [0, 1, 0],
+      [0, 1, 1],
+      [0, 1, 0],
+    ]
+    assert_equal transposed, transpose(a)
+  end
+
+  def test_unrotate
+    rotated =
+    [
+      [1, 1, 1, 0],
+      [2, 2, 3, 3],
+      [2, 2, 0, 0],
+      [0, 0, 4, 0],
+      [0, 0, 4, 0],
+    ]
+    results =
+    [
+      [[0,0],[0,2]],
+      [[1,0],[2,1]],
+      [[1,2],[1,3]],
+      [[3,2],[4,2]],
+    ]
+    _unrotated =
+    [
+      [0, 3, 0, 0, 0],
+      [1, 3, 0, 4, 4],
+      [1, 2, 2, 0, 0],
+      [1, 2, 2, 0, 0],
+    ]
+    unrotated_results =
+    [
+      [[1,0],[3,0]],
+      [[2,1],[3,2]],
+      [[0,1],[1,1]],
+      [[1,3],[1,4]],
+    ]
+    assert_equal unrotated_results, unrotate(rotated, results)
+  end
+
   def test_sample
     input = %(3 5 1 6
 TTTTT

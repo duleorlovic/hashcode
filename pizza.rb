@@ -8,13 +8,101 @@
 # S : total number of slices
 # x1 y1 x2 y2 : coordinate of first and last cell in slice (0 0) (2 1)
 #
-# points: example 15, small 39, medium 47553, big 873_131, Total 920_738
+# points: example 15, small 36, medium 47_617, big 874_829, Total 920_738
 # https://hashcode-pizza.now.sh/ Visual
+# errors on submittion counts from 0, for example slice 0
 require 'pp'
 require './ppp'
 require 'byebug'
 
 def solution(aa:, l:, h:)
+  s = one_solution(aa: aa, l: l, h: h)
+  # s = { marked: [[]], results: [] }
+  max_sum = sum_array(s[:marked])
+  max_results = s[:results]
+  temp = aa
+  3.times do
+    rotated = rotate(temp)
+    results_rotated = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_rotated[:marked])
+    if max_sum < temp_sum
+      max_sum = temp_sum
+      max_results = unrotate(rotated, results_rotated[:results])
+      # max_results.length.times do |i|
+      #   byebug unless rotate(submatrix(aa, max_results[i]))==submatrix(rotated, results_rotated[:results][i])
+      # end
+    end
+    temp = rotated
+  end
+  inversed = inverse(aa)
+  results_inversed = one_solution(aa: inversed, l: l, h: h)
+  temp_sum = sum_array(results_inversed[:marked])
+  if max_sum < temp_sum
+    max_sum = temp_sum
+    max_results = results_inversed[:results]
+  end
+  temp = inversed
+  3.times do
+    rotated = rotate(temp)
+    results_rotated = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_rotated[:marked])
+    if max_sum < temp_sum
+      max_sum = temp_sum
+      max_results = unrotate(rotated, results_rotated[:results])
+    end
+    temp = rotated
+  end
+  transposed = transpose(aa)
+  results_transposed = one_solution(aa: transposed, l: l, h: h)
+  temp_sum = sum_array(results_transposed[:marked])
+  if max_sum < temp_sum
+    max_sum = temp_sum
+    max_results = results_transposed[:results]
+  end
+  temp = transposed
+  3.times do
+    rotated = rotate(temp)
+    results_rotated = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_rotated[:marked])
+    if max_sum < temp_sum
+      max_sum = temp_sum
+      max_results = unrotate(rotated, results_rotated[:results])
+    end
+    temp = rotated
+  end
+  transposed_inversed = inverse(transpose(aa))
+  results_transposed_inversed = one_solution(aa: transposed_inversed, l: l, h: h)
+  temp_sum = sum_array(results_transposed_inversed[:marked])
+  if max_sum < temp_sum
+    max_sum = temp_sum
+    max_results = results_transposed_inversed[:results]
+  end
+  temp = transposed_inversed
+  3.times do
+    rotated = rotate(temp)
+    results_rotated = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_rotated[:marked])
+    if max_sum < temp_sum
+      max_sum = temp_sum
+      max_results = unrotate(rotated, results_rotated[:results])
+    end
+    temp = rotated
+  end
+  puts max_sum
+  max_results
+end
+
+def sum_array(marked)
+  sum_marked = marked.inject(0) do |sum, row|
+    sum + row.inject(0) do |row_sum, x|
+      row_sum + (x ? 1 : 0)
+    end
+  end
+  puts "sum(marked)=#{sum_marked} percentage=#{sum_marked*1.0/(marked.length * marked[0].length)}"
+  sum_marked
+end
+
+def one_solution(aa:, l:, h:)
   # create prefix sum and expand slice as much as you can
   # slice has max h, x*y <=h
   # slice has sum >= l (T) and sum <= x*y - l (M = total - sum >= l)
@@ -25,9 +113,9 @@ def solution(aa:, l:, h:)
   # .(a+x,b). .  (a+x,b+y)
   # .   .   . .     .
   #
-  puts "l=#{l}, h=#{h}"
-  ppp aa
-  marked = Array.new(aa.length) { Array.new(aa[0].length) }
+  reset_prefix_sum
+  # puts "l=#{l}, h=#{h}"
+  marked = Array.new(aa.length) { Array.new(aa[0].length) { false } }
   results = []
 
   aa.each_with_index do |row, i|
@@ -81,15 +169,14 @@ def solution(aa:, l:, h:)
       end
     end # row.each_with_index do |el, j|
   end # aa.each_with_index do |row, i|
-  sum_marked = marked.inject(0) do |sum, row|
-    sum + row.inject(0) do |row_sum, x|
-      row_sum + (x ? 1 : 0)
+  # iterate over each unmarked to attach to neigbords
+  marked.each_with_index do |row, i|
+    row.each_with_index do |is_marked, j|
+      next unless is_marked
     end
   end
-  puts "sum(marked)=#{sum_marked} percentage=#{sum_marked*1.0/(aa.length * aa[0].length)}"
-  ppp marked
 
-  results
+  { results: results, marked: marked }
 end
 
 def drifted_point(i, j, x, y, drift_x, drift_y)
@@ -187,6 +274,10 @@ def at_least_at_most?(aa, l, slice)
   sum >= l && sum <= (c - a + 1) * (d - b + 1) - l
 end
 
+def reset_prefix_sum
+  @prefix_sum = nil
+end
+
 def prefix_sum(aa)
   return @prefix_sum if @prefix_sum
   # prefix_sum[i,j] = prefix_sum[0,0]+...+prefix_sum[0,j]+prefix_sum[1,0]+...+prefix_sum[1,j]+....prefix_sum[i,j]
@@ -207,6 +298,50 @@ def prefix_sum(aa)
   @prefix_sum
 end
 
+def inverse(aa)
+  bb = []
+  aa.each do |row|
+    bb << row.map {|el| el==0 ? 1 : 0 }
+  end
+  bb
+end
+
+def rotate(aa)
+  # rotate is clockwise
+  max_x = aa.length
+  max_y = aa[0].length
+  r = Array.new(max_y) { Array.new(max_x) }
+  aa.each_with_index do |row, i|
+    row.each_with_index do |el, j|
+      r[j][max_x-1-i] = el
+    end
+  end
+  r
+end
+
+def transpose(aa)
+  r = Array.new(aa[0].length) { Array.new(aa.length) }
+  aa.each_with_index do |row, i|
+    row.each_with_index do |el, j|
+      r[j][i] = el
+    end
+  end
+  r
+end
+
+def unrotate(rotated, results)
+  _max_x = rotated.length
+  max_y = rotated[0].length
+  unrotated_results = []
+  results.each do |slice|
+    a, b = slice[0]
+    c, d = slice[1]
+    # unrotated_results << [[b, max_x - 1 - c], [d, max_x - 1 - a]]
+    unrotated_results << [[max_y - 1 - d, a], [max_y - 1 - b, c]]
+  end
+  unrotated_results
+end
+
 if ARGV.length == 1
   file_name = ARGV.last.split('.').first
   r, _c, l, h = gets.split(' ').map(&:to_i)
@@ -218,10 +353,10 @@ if ARGV.length == 1
   end
   results = solution(aa: aa, l: l, h: h)
   File.open "#{file_name}.out", 'w' do |file|
-    puts results.length
+    # puts results.length
     file.puts results.length
     results.each do |row|
-      puts row.join(' ')
+      # puts row.join(' ')
       file.puts row.join(' ')
     end
   end
