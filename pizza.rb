@@ -8,7 +8,7 @@
 # S : total number of slices
 # x1 y1 x2 y2 : coordinate of first and last cell in slice (0 0) (2 1)
 #
-# points: example 15, small 36, medium 47_617, big 874_937, Total 920_738
+# points: example 15, small 42, medium 47_617, big 874_937, Total 922_611
 # https://hashcode-pizza.now.sh/ Visual
 # errors on submittion counts from 0, for example slice 0
 require 'pp'
@@ -36,24 +36,26 @@ def solution(aa:, l:, h:)
     end
     temp = rotated
   end
-  # inversed = inverse(aa)
-  # results_inversed = one_solution(aa: inversed, l: l, h: h)
-  # temp_sum = sum_array(results_inversed[:marked])
-  # if max_sum < temp_sum
-  #   max_sum = temp_sum
-  #   max_results = results_inversed[:results]
-  # end
-  # temp = inversed
-  # 3.times do
-  #   rotated = rotate(temp)
-  #   results_rotated = one_solution(aa: rotated, l: l, h: h)
-  #   temp_sum = sum_array(results_rotated[:marked])
-  #   if max_sum < temp_sum
-  #     max_sum = temp_sum
-  #     max_results = unrotate(rotated, results_rotated[:results])
-  #   end
-  #   temp = rotated
-  # end
+  inversed = inverse(aa)
+  results_inversed = one_solution(aa: inversed, l: l, h: h)
+  temp_sum = sum_array(results_inversed[:marked])
+  if max_sum < temp_sum
+    max_sum = temp_sum
+    max_results = results_inversed[:results]
+  end
+  temp = inversed
+  3.times do |rotate_times|
+    rotated = rotate(temp)
+    results_rotated = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_rotated[:marked])
+    if max_sum < temp_sum
+      max_sum = temp_sum
+      temp = results_inversed[:results]
+      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.even? ? rotate(aa) : aa), temp) }
+      max_results = temp
+    end
+    temp = rotated
+  end
   transposed = transpose(aa)
   results_transposed = one_solution(aa: transposed, l: l, h: h)
   temp_sum = sum_array(results_transposed[:marked])
