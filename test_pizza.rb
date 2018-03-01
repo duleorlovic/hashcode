@@ -173,7 +173,7 @@ class Test < Minitest::Test
       [[1,2],[1,3]],
       [[3,2],[4,2]],
     ]
-    _unrotated =
+    unrotated =
     [
       [0, 3, 0, 0, 0],
       [1, 3, 0, 4, 4],
@@ -187,8 +187,121 @@ class Test < Minitest::Test
       [[0,1],[1,1]],
       [[1,3],[1,4]],
     ]
+    assert_equal rotated, rotate(unrotated)
     assert_equal unrotated_results, unrotate(rotated, results)
   end
+
+  def test_untranspose
+    transposed =
+    [
+      [1, 1, 1, 0],
+      [2, 2, 3, 3],
+      [2, 2, 0, 0],
+      [0, 0, 4, 0],
+      [0, 0, 4, 0],
+    ]
+    results =
+    [
+      [[0,0],[0,2]],
+      [[1,0],[2,1]],
+      [[1,2],[1,3]],
+      [[3,2],[4,2]],
+    ]
+    untransposed =
+    [
+      [1, 2, 2, 0, 0],
+      [1, 2, 2, 0, 0],
+      [1, 3, 0, 4, 4],
+      [0, 3, 0, 0, 0],
+    ]
+    untransposed_results =
+    [
+      [[0,0],[2,0]],
+      [[0,1],[1,2]],
+      [[2,1],[3,1]],
+      [[2,3],[2,4]],
+    ]
+    assert_equal transposed, transpose(untransposed)
+    assert_equal untransposed_results, untranspose(results)
+  end
+
+  def test_composition
+    aa =
+    [
+      [1, 1, 1, 0],
+      [2, 2, 3, 3],
+      [2, 2, 0, 0],
+      [0, 0, 4, 0],
+      [0, 0, 4, 0],
+    ]
+    results =
+    [
+      [[0,0],[0,2]],
+      [[1,0],[2,1]],
+      [[1,2],[1,3]],
+      [[3,2],[4,2]],
+    ]
+    _transposed =
+    [
+      [1, 2, 2, 0, 0],
+      [1, 2, 2, 0, 0],
+      [1, 3, 0, 4, 4],
+      [0, 3, 0, 0, 0],
+    ]
+    transposed_rotated =
+    [
+      [0, 1, 1, 1],
+      [3, 3, 2, 2],
+      [0, 0, 2, 2],
+      [0, 4, 0, 0],
+      [0, 4, 0, 0],
+    ]
+    transposed_rotated_result =
+    [
+      [[0,1],[0,3]],
+      [[1,2],[2,3]],
+      [[1,0],[1,1]],
+      [[3,1],[4,1]],
+    ]
+    assert_equal transposed_rotated, rotate(transpose(aa))
+    assert_equal results, untranspose(unrotate(transposed_rotated, transposed_rotated_result))
+  end
+
+  def test_unrotate_twice
+    aa =
+    [
+      [1, 1, 1, 0],
+      [2, 2, 3, 3],
+      [2, 2, 0, 0],
+      [0, 0, 4, 0],
+      [0, 0, 4, 0],
+    ]
+    results =
+    [
+      [[0,0],[0,2]],
+      [[1,0],[2,1]],
+      [[1,2],[1,3]],
+      [[3,2],[4,2]],
+    ]
+    rotated_twice =
+    [
+      [0, 4, 0, 0],
+      [0, 4, 0, 0],
+      [0, 0, 2, 2],
+      [3, 3, 2, 2],
+      [0, 1, 1, 1],
+    ]
+    rotated_results =
+    [
+      [[4,1],[4,3]],
+      [[2,2],[3,3]],
+      [[3,0],[3,1]],
+      [[0,1],[1,1]],
+    ]
+    assert_equal rotated_twice, rotate(rotate(aa))
+    assert_equal results, unrotate(rotate(rotated_twice), unrotate(rotated_twice, rotated_results))
+  end
+
 
   def test_sample
     input = %(3 5 1 6

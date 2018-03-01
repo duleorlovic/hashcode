@@ -8,7 +8,7 @@
 # S : total number of slices
 # x1 y1 x2 y2 : coordinate of first and last cell in slice (0 0) (2 1)
 #
-# points: example 15, small 36, medium 47_617, big 874_829, Total 920_738
+# points: example 15, small 36, medium 47_617, big 874_937, Total 920_738
 # https://hashcode-pizza.now.sh/ Visual
 # errors on submittion counts from 0, for example slice 0
 require 'pp'
@@ -21,52 +21,56 @@ def solution(aa:, l:, h:)
   max_sum = sum_array(s[:marked])
   max_results = s[:results]
   temp = aa
-  3.times do
+  3.times do |rotate_times|
     rotated = rotate(temp)
     results_rotated = one_solution(aa: rotated, l: l, h: h)
     temp_sum = sum_array(results_rotated[:marked])
     if max_sum < temp_sum
       max_sum = temp_sum
-      max_results = unrotate(rotated, results_rotated[:results])
+      temp = results_rotated[:results]
+      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.even? ? rotate(aa) : aa), temp) }
+      max_results = temp
       # max_results.length.times do |i|
       #   byebug unless rotate(submatrix(aa, max_results[i]))==submatrix(rotated, results_rotated[:results][i])
       # end
     end
     temp = rotated
   end
-  inversed = inverse(aa)
-  results_inversed = one_solution(aa: inversed, l: l, h: h)
-  temp_sum = sum_array(results_inversed[:marked])
-  if max_sum < temp_sum
-    max_sum = temp_sum
-    max_results = results_inversed[:results]
-  end
-  temp = inversed
-  3.times do
-    rotated = rotate(temp)
-    results_rotated = one_solution(aa: rotated, l: l, h: h)
-    temp_sum = sum_array(results_rotated[:marked])
-    if max_sum < temp_sum
-      max_sum = temp_sum
-      max_results = unrotate(rotated, results_rotated[:results])
-    end
-    temp = rotated
-  end
+  # inversed = inverse(aa)
+  # results_inversed = one_solution(aa: inversed, l: l, h: h)
+  # temp_sum = sum_array(results_inversed[:marked])
+  # if max_sum < temp_sum
+  #   max_sum = temp_sum
+  #   max_results = results_inversed[:results]
+  # end
+  # temp = inversed
+  # 3.times do
+  #   rotated = rotate(temp)
+  #   results_rotated = one_solution(aa: rotated, l: l, h: h)
+  #   temp_sum = sum_array(results_rotated[:marked])
+  #   if max_sum < temp_sum
+  #     max_sum = temp_sum
+  #     max_results = unrotate(rotated, results_rotated[:results])
+  #   end
+  #   temp = rotated
+  # end
   transposed = transpose(aa)
   results_transposed = one_solution(aa: transposed, l: l, h: h)
   temp_sum = sum_array(results_transposed[:marked])
   if max_sum < temp_sum
     max_sum = temp_sum
-    max_results = results_transposed[:results]
+    max_results = untranspose(results_transposed[:results])
   end
   temp = transposed
-  3.times do
+  3.times do |rotate_times|
     rotated = rotate(temp)
-    results_rotated = one_solution(aa: rotated, l: l, h: h)
-    temp_sum = sum_array(results_rotated[:marked])
+    results_transposed = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_transposed[:marked])
     if max_sum < temp_sum
       max_sum = temp_sum
-      max_results = unrotate(rotated, results_rotated[:results])
+      temp = results_transposed[:results]
+      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.odd? ? rotate(aa) : aa), temp) }
+      max_results = untranspose(temp)
     end
     temp = rotated
   end
@@ -78,18 +82,34 @@ def solution(aa:, l:, h:)
     max_results = results_transposed_inversed[:results]
   end
   temp = transposed_inversed
-  3.times do
+  3.times do |rotate_times|
     rotated = rotate(temp)
-    results_rotated = one_solution(aa: rotated, l: l, h: h)
-    temp_sum = sum_array(results_rotated[:marked])
+    results_transposed_inversed = one_solution(aa: rotated, l: l, h: h)
+    temp_sum = sum_array(results_transposed_inversed[:marked])
     if max_sum < temp_sum
       max_sum = temp_sum
-      max_results = unrotate(rotated, results_rotated[:results])
+      temp = results_transposed_inversed[:results]
+      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.odd? ? rotate(aa) : aa), temp) }
+      max_results = untranspose(temp)
     end
     temp = rotated
   end
   puts max_sum
   max_results
+end
+
+def check_results(aa, l, results)
+  reset_prefix_sum
+  results.each do |slice|
+    unless at_least_at_most?(aa, l, slice)
+      puts "at_least_at_most #{l} fail for slice"
+      byebug
+      ppp slice
+      ppp submatrix(aa, slice)
+      return false
+    end
+  end
+  true
 end
 
 def sum_array(marked)
@@ -176,6 +196,12 @@ def one_solution(aa:, l:, h:)
     end
   end
 
+  unless check_results(aa, l, results)
+    ppp aa
+    ppp l
+    ppp results
+    fail "check_results"
+  end
   { results: results, marked: marked }
 end
 
@@ -336,10 +362,19 @@ def unrotate(rotated, results)
   results.each do |slice|
     a, b = slice[0]
     c, d = slice[1]
-    # unrotated_results << [[b, max_x - 1 - c], [d, max_x - 1 - a]]
     unrotated_results << [[max_y - 1 - d, a], [max_y - 1 - b, c]]
   end
   unrotated_results
+end
+
+def untranspose(results)
+  untransposed_results = []
+  results.each do |slice|
+    a, b = slice[0]
+    c, d = slice[1]
+    untransposed_results << [[b, a], [d, c]]
+  end
+  untransposed_results
 end
 
 if ARGV.length == 1
