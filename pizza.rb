@@ -8,7 +8,7 @@
 # S : total number of slices
 # x1 y1 x2 y2 : coordinate of first and last cell in slice (0 0) (2 1)
 #
-# points: example 15, small 42, medium 47_617, big 874_937, Total 922_611
+# points: example 15, small 42, medium 47_617, big 883_837, Total 931_511
 # https://hashcode-pizza.now.sh/ Visual
 # errors on submittion counts from 0, for example slice 0
 require 'pp'
@@ -20,81 +20,83 @@ def solution(aa:, l:, h:)
   # s = { marked: [[]], results: [] }
   max_sum = sum_array(s[:marked])
   max_results = s[:results]
-  temp = aa
-  3.times do |rotate_times|
-    rotated = rotate(temp)
-    results_rotated = one_solution(aa: rotated, l: l, h: h)
-    temp_sum = sum_array(results_rotated[:marked])
+  if true # try variations
+    temp = aa
+    3.times do |rotate_times|
+      rotated = rotate(temp)
+      results_rotated = one_solution(aa: rotated, l: l, h: h)
+      temp_sum = sum_array(results_rotated[:marked])
+      if max_sum < temp_sum
+        max_sum = temp_sum
+        temp = results_rotated[:results]
+        (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.even? ? rotate(aa) : aa), temp) }
+        max_results = temp
+        # max_results.length.times do |i|
+        #   byebug unless rotate(submatrix(aa, max_results[i]))==submatrix(rotated, results_rotated[:results][i])
+        # end
+      end
+      temp = rotated
+    end
+    inversed = inverse(aa)
+    results_inversed = one_solution(aa: inversed, l: l, h: h)
+    temp_sum = sum_array(results_inversed[:marked])
     if max_sum < temp_sum
       max_sum = temp_sum
-      temp = results_rotated[:results]
-      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.even? ? rotate(aa) : aa), temp) }
-      max_results = temp
-      # max_results.length.times do |i|
-      #   byebug unless rotate(submatrix(aa, max_results[i]))==submatrix(rotated, results_rotated[:results][i])
-      # end
+      max_results = results_inversed[:results]
     end
-    temp = rotated
-  end
-  inversed = inverse(aa)
-  results_inversed = one_solution(aa: inversed, l: l, h: h)
-  temp_sum = sum_array(results_inversed[:marked])
-  if max_sum < temp_sum
-    max_sum = temp_sum
-    max_results = results_inversed[:results]
-  end
-  temp = inversed
-  3.times do |rotate_times|
-    rotated = rotate(temp)
-    results_rotated = one_solution(aa: rotated, l: l, h: h)
-    temp_sum = sum_array(results_rotated[:marked])
-    if max_sum < temp_sum
-      max_sum = temp_sum
-      temp = results_inversed[:results]
-      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.even? ? rotate(aa) : aa), temp) }
-      max_results = temp
+    temp = inversed
+    3.times do |rotate_times|
+      rotated = rotate(temp)
+      results_rotated = one_solution(aa: rotated, l: l, h: h)
+      temp_sum = sum_array(results_rotated[:marked])
+      if max_sum < temp_sum
+        max_sum = temp_sum
+        temp = results_inversed[:results]
+        (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.even? ? rotate(aa) : aa), temp) }
+        max_results = temp
+      end
+      temp = rotated
     end
-    temp = rotated
-  end
-  transposed = transpose(aa)
-  results_transposed = one_solution(aa: transposed, l: l, h: h)
-  temp_sum = sum_array(results_transposed[:marked])
-  if max_sum < temp_sum
-    max_sum = temp_sum
-    max_results = untranspose(results_transposed[:results])
-  end
-  temp = transposed
-  3.times do |rotate_times|
-    rotated = rotate(temp)
-    results_transposed = one_solution(aa: rotated, l: l, h: h)
+    transposed = transpose(aa)
+    results_transposed = one_solution(aa: transposed, l: l, h: h)
     temp_sum = sum_array(results_transposed[:marked])
     if max_sum < temp_sum
       max_sum = temp_sum
-      temp = results_transposed[:results]
-      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.odd? ? rotate(aa) : aa), temp) }
-      max_results = untranspose(temp)
+      max_results = untranspose(results_transposed[:results])
     end
-    temp = rotated
-  end
-  transposed_inversed = inverse(transpose(aa))
-  results_transposed_inversed = one_solution(aa: transposed_inversed, l: l, h: h)
-  temp_sum = sum_array(results_transposed_inversed[:marked])
-  if max_sum < temp_sum
-    max_sum = temp_sum
-    max_results = results_transposed_inversed[:results]
-  end
-  temp = transposed_inversed
-  3.times do |rotate_times|
-    rotated = rotate(temp)
-    results_transposed_inversed = one_solution(aa: rotated, l: l, h: h)
+    temp = transposed
+    3.times do |rotate_times|
+      rotated = rotate(temp)
+      results_transposed = one_solution(aa: rotated, l: l, h: h)
+      temp_sum = sum_array(results_transposed[:marked])
+      if max_sum < temp_sum
+        max_sum = temp_sum
+        temp = results_transposed[:results]
+        (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.odd? ? rotate(aa) : aa), temp) }
+        max_results = untranspose(temp)
+      end
+      temp = rotated
+    end
+    transposed_inversed = inverse(transpose(aa))
+    results_transposed_inversed = one_solution(aa: transposed_inversed, l: l, h: h)
     temp_sum = sum_array(results_transposed_inversed[:marked])
     if max_sum < temp_sum
       max_sum = temp_sum
-      temp = results_transposed_inversed[:results]
-      (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.odd? ? rotate(aa) : aa), temp) }
-      max_results = untranspose(temp)
+      max_results = results_transposed_inversed[:results]
     end
-    temp = rotated
+    temp = transposed_inversed
+    3.times do |rotate_times|
+      rotated = rotate(temp)
+      results_transposed_inversed = one_solution(aa: rotated, l: l, h: h)
+      temp_sum = sum_array(results_transposed_inversed[:marked])
+      if max_sum < temp_sum
+        max_sum = temp_sum
+        temp = results_transposed_inversed[:results]
+        (rotate_times+1).times { |unrotate_times| temp = unrotate((unrotate_times.odd? ? rotate(aa) : aa), temp) }
+        max_results = untranspose(temp)
+      end
+      temp = rotated
+    end
   end
   puts max_sum
   max_results
@@ -105,7 +107,6 @@ def check_results(aa, l, results)
   results.each do |slice|
     unless at_least_at_most?(aa, l, slice)
       puts "at_least_at_most #{l} fail for slice"
-      byebug
       ppp slice
       ppp submatrix(aa, slice)
       return false
@@ -186,18 +187,13 @@ def one_solution(aa:, l:, h:)
       end
 
       if max_slice
-        mark(marked, max_slice)
         results << max_slice
+        position_in_results = results.length - 1
+        mark(marked, max_slice, position_in_results)
       end
     end # row.each_with_index do |el, j|
   end # aa.each_with_index do |row, i|
-  # iterate over each unmarked to attach to neigbords
-  marked.each_with_index do |row, i|
-    row.each_with_index do |is_marked, j|
-      next unless is_marked
-    end
-  end
-
+  extend_unmarked(aa, results, marked, l, h)
   unless check_results(aa, l, results)
     ppp aa
     ppp l
@@ -241,12 +237,12 @@ def is_not_already_marked?(marked, slice)
   true
 end
 
-def mark(marked, slice)
+def mark(marked, slice, position_in_results)
   a, b = slice[0]
   c, d = slice[1]
   (a..c).each do |x|
     (b..d).each do |y|
-      marked[x][y] = true
+      marked[x][y] = position_in_results
     end
   end
   marked
@@ -379,6 +375,79 @@ def untranspose(results)
   untransposed_results
 end
 
+def extend_unmarked(aa, results, marked, l, h)
+  # iterate over each unmarked to attach to neigbords
+  marked.each_with_index do |row, i|
+    row.each_with_index do |position_in_results, j|
+      next if position_in_results
+      # try left slice
+      if j > 0
+        left_position_in_results = marked[i][j-1]
+        if left_position_in_results
+          slice = results[left_position_in_results]
+          a, b = slice[0]
+          c, d = slice[1]
+          new_slice = [[a,b], [c,d+1]]
+          if ((d+1 - b + 1)*(c - a + 1)<=h) && is_not_already_marked?(marked, [[a,d+1],[c,d+1]]) && at_least_at_most?(aa, l, new_slice)
+            results[left_position_in_results] = new_slice
+            mark(marked, new_slice, left_position_in_results)
+            # puts "new_slice at i=#{i} j=#{j}"
+            next
+          end
+        end
+      end
+      # try up slice
+      if i > 0
+        up_position_in_results = marked[i-1][j]
+        if up_position_in_results
+          slice = results[up_position_in_results]
+          a, b = slice[0]
+          c, d = slice[1]
+          new_slice = [[a,b], [c+1,d]]
+          if ((d - b + 1)*(c+1 - a + 1)<=h) && is_not_already_marked?(marked, [[c+1,b],[c+1,d]]) && at_least_at_most?(aa, l, new_slice)
+            results[up_position_in_results] = new_slice
+            mark(marked, new_slice, up_position_in_results)
+            # puts "new_slice at i=#{i} j=#{j}"
+            next
+          end
+        end
+      end
+      # try right slice
+      if j < aa[0].length - 1
+        right_position_in_results = marked[i][j+1]
+        if right_position_in_results
+          slice = results[right_position_in_results]
+          a, b = slice[0]
+          c, d = slice[1]
+          new_slice = [[a,b-1], [c,d]]
+          if ((d - (b-1) + 1)*(c - a + 1)<=h) && is_not_already_marked?(marked, [[a,b-1],[c,b-1]]) && at_least_at_most?(aa, l, new_slice)
+            results[right_position_in_results] = new_slice
+            mark(marked, new_slice, right_position_in_results)
+            # puts "new_slice at i=#{i} j=#{j}"
+            next
+          end
+        end
+      end
+      # try down slice
+      if i < aa.length - 1
+        down_position_in_results = marked[i+1][j]
+        if down_position_in_results
+          slice = results[down_position_in_results]
+          a, b = slice[0]
+          c, d = slice[1]
+          new_slice = [[a-1,b], [c,d]]
+          if ((d - b + 1)*(c - (a-1) + 1)<=h) && is_not_already_marked?(marked, [[a-1,b],[a-1,d]]) && at_least_at_most?(aa, l, new_slice)
+            results[down_position_in_results] = new_slice
+            mark(marked, new_slice, down_position_in_results)
+            # puts "new_slice at i=#{i} j=#{j}"
+            next
+          end
+        end
+      end
+    end
+  end
+end
+
 if ARGV.length == 1
   file_name = ARGV.last.split('.').first
   r, _c, l, h = gets.split(' ').map(&:to_i)
@@ -398,3 +467,4 @@ if ARGV.length == 1
     end
   end
 end
+

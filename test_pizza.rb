@@ -63,7 +63,7 @@ class Test < Minitest::Test
       [true, true, nil],
       [true, nil, nil],
     ]
-    assert_equal m1, mark(marked, [[0,0],[0,0]])
+    assert_equal m1, mark(marked, [[0,0],[0,0]], true)
   end
 
   def test_submatric
@@ -360,5 +360,32 @@ TM)
       l: l,
       h: h,
     }
+  end
+
+  def test_extending_slice
+    l = 1
+    aa = [
+      [0, 0, 0, 0, 0],
+      [0, 1, 1, 1, 0],
+      [0, 0, 0, 0, 0],
+    ]
+    results = [
+      [[0,0],[1,1]],
+      [[1,2],[2,2]],
+      [[0,3],[2,3]],
+    ]
+    marked = [
+      [0,   0,   nil, 2,  nil],
+      [0,   0,   1,   2,  nil],
+      [nil, nil, 1,   2,  nil],
+    ]
+    extend_unmarked aa, results, marked, l
+
+    target_results = [
+      [[0,0],[2,1]],
+      [[0,2],[2,2]],
+      [[0,3],[2,4]],
+    ]
+    assert_equal target_results, results
   end
 end

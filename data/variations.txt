@@ -1,0 +1,9 @@
+data.big: best perc 0.883837 883837
+normal
+881974, 883024, 882635, 883837
+inversed (has some problems)
+882956, 883543, 883271, 883335
+transposed
+883346, 882024, 883424, 882124
+transposed_inversed
+883077, 882596, 883773, 882353
